@@ -36,7 +36,9 @@
 
     <nav class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="text-2xl font-bold text-blue-600 uppercase">ZURNA DÜRÜM</div>
+            <div class="text-2xl font-bold text-blue-600 uppercase cursor-pointer hover:text-blue-800 transition" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    ZURNA DÜRÜM
+</div>
             <div class="flex space-x-4 font-medium">
                 <a href="#ozellikler" onclick="event.preventDefault(); document.getElementById('ozellikler').scrollIntoView({behavior: 'smooth'})" class="hover:text-blue-600 transition">Özellikler</a>
                 <a href="#vitaller" onclick="event.preventDefault(); document.getElementById('vitaller').scrollIntoView({behavior: 'smooth'})" class="hover:text-blue-600 transition">Vital Takip</a>
