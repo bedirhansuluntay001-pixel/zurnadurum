@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zurna Dürüm | Akıllı Bakım Sistemi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* TANSİYON DALGASI (Yavaş: 3s) */
+        @keyframes wave-move { from { transform: translateX(0); } to { transform: translateX(-40px); } }
+        .animate-wave { animation: wave-move 3s linear infinite; }
+
+        /* EKG DALGASI (Hızlı: 1.5s) */
+        @keyframes ekg-flow { from { transform: translateX(0); } to { transform: translateX(-150px); } }
+        .animate-ekg-wave { animation: ekg-flow 1.5s linear infinite; }
+
+        /* PLETH (OKSİJEN) DALGASI */
+        @keyframes pleth-flow { from { transform: translateX(0); } to { transform: translateX(-80px); } }
+        .animate-pleth-wave { animation: pleth-flow 2.5s linear infinite; }
+
+        /* ATEŞ TREND DALGASI */
+        @keyframes temp-wave-move { from { transform: translateX(0); } to { transform: translateX(-30px); } }
+        .animate-temp-wave { animation: temp-wave-move 4s linear infinite; }
+         /* Kayıt Tablosu Stilleri */
+.vital-table { width: 100%; border-collapse: collapse; margin-top: 15px; color: white; }
+.vital-table th, .vital-table td { border: 1px solid rgba(255,255,255,0.1); padding: 12px; text-align: center; }
+.vital-table th { background: rgba(59, 130, 246, 0.2); font-weight: bold; }
+.vital-table tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+.tab-btn { padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; border: 1px solid #3b82f6; }
+.active-tab { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-blue-600 uppercase">ZURNA DÜRÜM</div>
+            <div class="hidden md:flex space-x-8 font-medium">
+                <a href="#ozellikler" onclick="event.preventDefault(); document.getElementById('ozellikler').scrollIntoView({behavior: 'smooth'})" class="hover:text-blue-600 transition">Özellikler</a>
+                <a href="#vitaller" onclick="event.preventDefault(); document.getElementById('vitaller').scrollIntoView({behavior: 'smooth'})" class="hover:text-blue-600 transition">Vital Takip</a>
+               
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-gradient-to-r border-b from-blue-50 to-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-5xl font-extrabold mb-6 text-gray-900 leading-tight">Sadece Bir Yatak Değil, <br><span class="text-blue-600">Karar Veren Bir Bakım Sistemi</span></h1>
+            <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+                Yapay zeka destekli, dekübit önleyici ve 7/24 vital takibi yapan bütüncül sağlık platformu.
+            </p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="monitoruBaslat()" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:shadow-lg transition">Canlı Takip</button>
+                <button href="#projegeliştiricileri" onclick="event.preventDefault(); document.getElementById('projegeliştiricileri').scrollIntoView({behavior: 'smooth'})" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:shadow-lg transition">Proje Geliştiricileri</button>
+            </div>
+        </div>
+    </header>
+
+    <section id="ozellikler" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16">Sistem Özellikleri</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border hover:shadow-md transition">
+                    <i class="fas fa-brain text-4xl text-blue-500 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-4 uppercase text-gray-800">Yapay Zeka Asistanı</h3>
+                    <p class="text-gray-600">Hastalıkları tahmin edebilen ve verileri analiz eden entegre AI desteği.</p>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border hover:shadow-md transition border-blue-100 bg-blue-50/20">
+                    <i class="fas fa-bed text-4xl text-blue-600 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-4 uppercase text-gray-800">Konfor & Isı</h3>
+                    <p class="text-gray-600">Yatak ısıtma/soğutma ve yemek yeme kolaylığı için otomatik sehpa sistemi.</p>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-sm border hover:shadow-md transition">
+                    <i class="fas fa-bell text-4xl text-blue-500 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-4 uppercase text-gray-800">Akıllı Uyarı</h3>
+                    <p class="text-gray-600">Mobil uygulama bildirimleri ve acil durum alarmları ile tam güvenlik.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <section id="konfor" class="py-20 bg-blue-600 text-white overflow-hidden">
+    <div class="container mx-auto px-6 relative">
+        
+        <div id="sliderContainer" 
+             onmousemove="handleMouseNav(event)"
+             class="flex transition-transform duration-1000 ease-in-out" 
+             style="transform: translateX(0%);">
+            
+            <div class="w-full flex-shrink-0 px-20"> 
+                <div class="flex flex-col md:flex-row items-center gap-32">
+                    <div class="md:w-1/2">
+                        <h2 class="text-4xl font-bold mb-6">Dekübit (Basınç Yarası) Önleme</h2>
+                        <p class="text-lg mb-8 opacity-90 leading-relaxed">
+                            Basınç sensörleri ile vücut ısı haritasını çıkarıyor ve dekübit oluşmadan müdahale ediyoruz.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center"><i class="fas fa-check-circle mr-3 text-blue-300"></i> Isı Haritası Oluşturma</li>
+                            <li class="flex items-center"><i class="fas fa-check-circle mr-3 text-blue-300"></i> Otomatik Pozisyon Değiştirme</li>
+                        </ul>
+                    </div>
+                    <div class="md:w-1/2 bg-white/10 p-12 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl">
+                        <h3 class="text-2xl font-bold mb-4 italic text-blue-100">"Bizim Farkımız"</h3>
+                        <p class="text-xl">Mevcut sistemler basıncı sadece dağıtırken, bizim sistemimiz analiz ederek önler.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex-shrink-0 px-20">
+                <div class="flex flex-col md:flex-row items-center gap-32">
+                    <div class="md:w-1/2">
+                        <h2 class="text-4xl font-bold mb-6">Akıllı Yemek Sehpası</h2>
+                        <p class="text-lg mb-8 opacity-90 leading-relaxed">
+                            Hastanın pozisyonuna göre otomatik açılan, yüksekliği yapay zeka ile ayarlanan sistem.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center"><i class="fas fa-utensils mr-3 text-blue-300"></i> Otomatik Algılama</li>
+                            <li class="flex items-center"><i class="fas fa-tablet-alt mr-3 text-blue-300"></i> Tablet Desteği</li>
+                        </ul>
+                    </div>
+                    <div class="md:w-1/2 bg-white/10 p-12 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl">
+                        <h3 class="text-2xl font-bold mb-4 italic text-blue-100">"Konfor"</h3>
+                        <p class="text-xl italic">"Hastanın özgürlüğünü geri veren akıllı asistan."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full flex-shrink-0 px-20">
+                <div class="flex flex-col md:flex-row items-center gap-32">
+                    <div class="md:w-1/2">
+                        <h2 class="text-4xl font-bold mb-6">İklimlendirilmiş Alan</h2>
+                        <p class="text-lg mb-8 opacity-90 leading-relaxed">
+                            Vücut ısısına duyarlı, terlemeyi önleyen aktif soğutma ve ısıtma katmanı.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 bg-white/10 p-12 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl text-center">
+                        <div class="text-6xl font-bold mb-2">36.5°C</div>
+                        <p class="uppercase tracking-widest text-sm opacity-70">İdeal Isı Sabitlendi</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="flex justify-center mt-12 space-x-4">
+            <button onclick="moveSlider(0)" id="dot0" class="w-12 h-2 rounded-full bg-white transition-all"></button>
+            <button onclick="moveSlider(1)" id="dot1" class="w-8 h-2 rounded-full bg-white/30 transition-all"></button>
+            <button onclick="moveSlider(2)" id="dot2" class="w-8 h-2 rounded-full bg-white/30 transition-all"></button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 3;
+        let autoPlayInterval;
+
+        function moveSlider(index) {
+            currentSlide = index;
+            const container = document.getElementById('sliderContainer');
+            const dots = [document.getElementById('dot0'), document.getElementById('dot1'), document.getElementById('dot2')];
+            
+            container.style.transform = `translateX(-${index * 100}%)`;
+            
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('bg-white', i === index);
+                dot.classList.toggle('bg-white/30', i !== index);
+                dot.style.width = i === index ? '3rem' : '2rem';
+            });
+        }
+
+        // Mouse Sağ-Sol Takibi ile Geçiş
+        function handleMouseNav(e) {
+            const width = window.innerWidth;
+            const mouseX = e.clientX;
+
+            // Mouse sağ tarafa %15 yaklaştıysa sonraki
+            if (mouseX > width * 0.85) {
+                if(currentSlide < totalSlides - 1) moveSlider(currentSlide + 1);
+            } 
+            // Mouse sol tarafa %15 yaklaştıysa önceki
+            else if (mouseX < width * 0.15) {
+                if(currentSlide > 0) moveSlider(currentSlide - 1);
+            }
+            resetAutoPlay(); // Manuel müdahalede süreyi sıfırla
+        }
+
+        // Otomatik Slayt Başlatma
+        function startAutoPlay() {
+            autoPlayInterval = setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                moveSlider(currentSlide);
+            }, 5000); // 5 saniyede bir geçer
+        }
+
+        function resetAutoPlay() {
+            clearInterval(autoPlayInterval);
+            startAutoPlay();
+        }
+
+        window.onload = startAutoPlay;
+    </script>
+</section>
+
+   <section id="vitaller" class="py-20">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-bold mb-4">7/24 Kesintisiz Vital Takibi</h2>
+        <div class="flex flex-wrap justify-center gap-8">
+            <div onclick="kayitlariGoster('Tansiyon', '120/80')" class="cursor-pointer w-36 h-36 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-blue-100 hover:scale-110 transition group">
+                <i class="fas fa-heart-circle-check text-blue-500 text-3xl mb-1"></i>
+                <span class="text-sm font-bold text-gray-700">Tansiyon</span>
+            </div>
+            <div onclick="kayitlariGoster('Nabız', '75 bpm')" class="cursor-pointer w-36 h-36 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-red-100 hover:scale-110 transition group">
+                <i class="fas fa-wave-square text-red-500 text-3xl mb-1"></i>
+                <span class="text-sm font-bold text-gray-700">Nabız</span>
+            </div>
+            <div onclick="kayitlariGoster('Ateş', '36.5°C')" class="cursor-pointer w-36 h-36 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-orange-100 hover:scale-110 transition group">
+                <i class="fas fa-thermometer-half text-orange-500 text-3xl mb-1"></i>
+                <span class="text-sm font-bold text-gray-700">Ateş</span>
+            </div>
+            <div onclick="kayitlariGoster('Nem/Ter', '%45')" class="cursor-pointer w-36 h-36 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-green-100 hover:scale-110 transition group">
+                <i class="fas fa-droplet text-green-500 text-3xl mb-1"></i>
+                <span class="text-sm font-bold text-gray-700 uppercase">Nem/Ter</span>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="kontrol-merkezi" class="py-20 bg-slate-100">
+    <div class="container mx-auto px-6 text-center">
+        <h2 class="text-3xl font-bold mb-4 text-gray-900">Akıllı Konfor ve Kontrol Merkezi</h2>
+        <p class="text-gray-600 mb-12 max-w-2xl mx-auto italic">Yatağın fiziksel özelliklerini ve yapay zeka asistanını buradan yönetebilirsiniz.</p>
+        
+        <div class="flex flex-wrap justify-center gap-10">
+            <div onclick="kontrolPaneliAc('isi')" class="cursor-pointer w-44 h-44 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-orange-100 hover:scale-110 transition group">
+                <i class="fas fa-thermometer-half text-orange-500 text-4xl mb-2 group-hover:animate-pulse"></i>
+                <span class="text-sm font-bold text-gray-700 text-center px-2">Yatak Isıtma / Soğutma</span>
+            </div>
+
+            <div onclick="kontrolPaneliAc('sehpa')" class="cursor-pointer w-44 h-44 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-blue-100 hover:scale-110 transition group">
+                <i class="fas fa-utensils text-blue-500 text-4xl mb-2 group-hover:animate-bounce"></i>
+                <span class="text-sm font-bold text-gray-700 text-center px-2">Otomatik Sehpa & Pozisyon</span>
+            </div>
+
+            <div onclick="asistanAc()" class="cursor-pointer w-44 h-44 flex flex-col justify-center items-center bg-white shadow-xl rounded-full border-4 border-purple-100 hover:scale-110 transition group">
+                <div class="relative">
+                    <i class="fas fa-robot text-purple-500 text-4xl mb-2"></i>
+                    <span class="absolute -top-2 -right-2 flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+                    </span>
+                </div>
+                <span class="text-sm font-bold text-gray-700">Gemini AI Asistan</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="kontrolModal" class="hidden fixed inset-0 bg-black/80 z-[150] flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl">
+        <button onclick="panelKapat()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-3xl">&times;</button>
+        <div id="modalIcerik"></div>
+    </div>
+</div>
+<div id="kayitPaneli" class="hidden fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="bg-gray-950 border-2 border-blue-900 rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative">
+        <button onclick="kayitKapat()" class="absolute top-6 right-6 text-gray-500 hover:text-white transition text-3xl">&times;</button>
+        
+        <div class="text-center mb-8">
+            <h3 id="panelBaslik" class="text-3xl font-bold text-white mb-2"></h3>
+            <p class="text-blue-400">Son Ölçüm: <span id="panelGuncel" class="font-mono"></span></p>
+        </div>
+
+        <div class="flex justify-center space-x-4 mb-8">
+            <button onclick="tabloOlustur('haftalik')" id="btnHafta" class="tab-btn active-tab text-white">Haftalık Kayıtlar</button>
+            <button onclick="tabloOlustur('aylik')" id="btnAy" class="tab-btn text-blue-400">Aylık Kayıtlar</button>
+        </div>
+
+        <div id="tabloAlani">
+            </div>
+    </div>
+</div>
+
+    <div id="grafikPaneli" class="hidden fixed inset-0 bg-black bg-opacity-95 z-[100] flex items-center justify-center p-4 backdrop-blur-md font-mono">
+        <div class="bg-gray-950 border-2 border-blue-900 rounded-2xl p-6 max-w-3xl w-full shadow-[0_0_50px_rgba(30,64,175,0.3)] relative">
+            <button onclick="grafigiKapat()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><i class="fas fa-times text-2xl"></i></button>
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-blue-400 font-bold uppercase tracking-widest">Arteryel Tansiyon (ART)</h3>
+                    <p class="text-[10px] text-gray-500">Hasta ID: #003-DOE | CANLI VERİ</p>
+                </div>
+                <span class="text-blue-500 text-xs animate-pulse">● AKTİF ÖLÇÜM</span>
+            </div>
+            <div class="h-48 bg-black rounded border border-blue-950 overflow-hidden mb-6 relative">
+                <svg class="w-full h-full" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                    <path d="M0,50 Q25,10 50,50 T100,50 T150,50 T200,50 T250,50 T300,50 T350,50 T400,50 T450,50 T500,50 T1000,50" 
+                          fill="none" stroke="#3b82f6" stroke-width="2" class="animate-wave"></path>
+                </svg>
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-gray-900 p-5 rounded-xl border border-blue-900 shadow-inner">
+                    <span class="text-blue-400 text-xs font-bold block mb-1">SİSTOLİK (Büyük)</span>
+                    <p id="tansiyonBuyuk" class="text-6xl font-black text-white">120</p>
+                    <span class="text-[10px] text-gray-500 uppercase">mmHg</span>
+                </div>
+                <div class="bg-gray-900 p-5 rounded-xl border border-blue-900 shadow-inner">
+                    <span class="text-blue-300 text-xs font-bold block mb-1">DİASTOLİK (Küçük)</span>
+                    <p id="tansiyonKucuk" class="text-6xl font-black text-white">80</p>
+                    <span class="text-[10px] text-gray-500 uppercase">mmHg</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="nabizPaneli" class="hidden fixed inset-0 bg-black bg-opacity-95 z-[100] flex items-center justify-center p-4 backdrop-blur-md font-mono">
+        <div class="bg-gray-950 border-2 border-red-900 rounded-2xl p-5 max-w-5xl w-full shadow-2xl relative">
+            <button onclick="nabizTablosunuKapat()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><i class="fas fa-times text-2xl"></i></button>
+            <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-9 space-y-4">
+                    <div class="h-40 bg-black border border-red-950 rounded overflow-hidden relative">
+                        <span class="absolute top-2 left-2 text-green-500 text-[10px] font-bold">EKG (II)</span>
+                        <svg class="w-full h-full" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                            <path d="M0,50 L50,50 L60,20 L70,80 L80,50 L120,50 L130,20 L140,80 L150,50 L300,50 L310,20 L320,80 L330,50 L500,50 L1000,50" 
+                                  fill="none" stroke="#22c55e" stroke-width="2" class="animate-ekg-wave"></path>
+                        </svg>
+                    </div>
+                    <div class="h-28 bg-black border border-cyan-950 rounded overflow-hidden relative">
+                        <span class="absolute top-2 left-2 text-cyan-500 text-[10px] font-bold">SPO2 (PLETH)</span>
+                        <svg class="w-full h-full" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                            <path d="M0,50 Q125,10 250,50 T500,50 T750,50 T1000,50" fill="none" stroke="#06b6d4" stroke-width="2" class="animate-pleth-wave"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="col-span-3 space-y-4">
+                    <div class="bg-gray-900 p-5 border border-red-900 rounded-xl text-center">
+                        <span class="text-red-500 text-xs font-bold block mb-1 uppercase">HR (Nabız)</span>
+                        <p id="liveHR" class="text-6xl font-bold text-white tracking-tighter">72</p>
+                        <span class="text-[8px] text-gray-600">BPM</span>
+                    </div>
+                    <div class="bg-gray-900 p-5 border border-cyan-900 rounded-xl text-center">
+                        <span class="text-cyan-500 text-xs font-bold block mb-1 uppercase">SPO2 (Oksijen)</span>
+                        <p id="liveSpO2" class="text-6xl font-bold text-white tracking-tighter">98</p>
+                        <span class="text-[8px] text-gray-600">%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="atesPaneli" class="hidden fixed inset-0 bg-black bg-opacity-95 z-[100] flex items-center justify-center p-4 backdrop-blur-md font-mono">
+        <div class="bg-gray-950 border-2 border-orange-900 rounded-2xl p-8 max-w-2xl w-full shadow-2xl relative">
+            <button onclick="atesVerileriniKapat()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition"><i class="fas fa-times text-2xl"></i></button>
+            <h3 class="text-orange-500 font-bold uppercase mb-8 tracking-tighter">Vücut Isısı (TEMP) Analizi</h3>
+            <div class="flex flex-col md:flex-row items-center justify-between bg-black p-10 rounded-2xl border border-orange-950">
+                <div class="text-left">
+                    <span class="text-orange-400 text-xs font-bold block mb-2 uppercase">Ölçülen Isı</span>
+                    <div class="flex items-baseline">
+                        <p id="atesDegeri" class="text-8xl font-black text-white">36.7</p>
+                        <span class="text-orange-500 text-3xl ml-3">°C</span>
+                    </div>
+                </div>
+                <div class="mt-8 md:mt-0">
+                    <i class="fas fa-thermometer-half text-8xl text-orange-600 animate-pulse drop-shadow-[0_0_15px_rgba(234,88,12,0.5)]"></i>
+                </div>
+            </div>
+            <div class="mt-6 text-[10px] text-gray-600 uppercase text-center border-t border-gray-900 pt-4 tracking-widest">
+                AI Analizi: Normal Aralık (36.1 - 37.2°C)
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="container mx-auto px-6 text-center">
+            <div class="my-12 border-t border-white/10 w-full opacity-50"></div>
+
+<div id="projegeliştiricileri" class="p-10 bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-3xl text-center text-white shadow-2xl mb-10">
+    <h2 class="text-3xl font-bold mb-6 text-blue-400">Proje Geliştiricileri</h2>
+    <div class="space-y-3 text-lg">
+        <p>Ahmet Erdem Uzuntaş</p>
+        <p>Bedirhan Sülüntay</p>
+        <p>Kübra Türkmen</p>
+    </div>
+</div>
+      <p class="text-2xl font-black mb-4 tracking-widest uppercase">ZURNA DÜRÜM</p>
+            <p class="opacity-60 max-w-lg mx-auto leading-relaxed">Kişiye Özel Bakım Algoritması & Yapay Zeka Destekli Yeni Nesil Sağlık Çözümü.</p>
+            <div class="mt-10 pt-8 border-t border-gray-800">
+                <p class="text-xs opacity-40 uppercase tracking-tighter">&copy; 2026 Akıllı Yatak Sistemleri. Tüm Hakları Saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+<div id="nemPaneli" class="hidden fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-4 backdrop-blur-md font-mono">
+    <div class="bg-gray-950 border-2 border-green-900 rounded-2xl p-6 max-w-2xl w-full shadow-[0_0_50px_rgba(34,197,94,0.3)] relative overflow-hidden">
+        
+        <button onclick="nemVerileriniKapat()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition z-20">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <div class="flex justify-between items-center mb-6 z-10 relative">
+            <div>
+                <h3 class="text-green-400 font-bold uppercase tracking-widest text-sm">Nem/Ter Analizi (EDA)</h3>
+                <p class="text-[10px] text-gray-500">Hasta ID: #003-DOE | CANLI VERİ</p>
+            </div>
+            <span class="text-green-500 text-xs animate-pulse">● AKTİF TAKİP</span>
+        </div>
+
+        <div class="h-32 bg-black rounded-lg border border-green-950 overflow-hidden mb-6 relative">
+            <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#15803d 1px, transparent 1px), linear-gradient(90deg, #15803d 1px, transparent 1px); background-size: 20px 20px;"></div>
+            <svg class="absolute inset-0 w-full h-full" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                <path d="M0,60 Q250,30 500,60 T1000,60" fill="none" stroke="#22c55e" stroke-width="1.5" class="animate-temp-wave"></path>
+            </svg>
+            <span class="absolute bottom-1 right-2 text-green-700 text-[8px]">TREND (5dk)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-900 p-5 rounded-xl border border-green-900 shadow-inner">
+                <span class="text-green-400 text-xs font-bold block mb-1">NEM % (RH)</span>
+                <div class="flex items-baseline">
+                    <p id="nemRH" class="text-6xl font-black text-white">45</p>
+                    <span class="text-green-500 text-xl ml-2">%</span>
+                </div>
+                <span class="text-[8px] text-gray-600 uppercase">Yatak Yüzeyi Nem Oranı</span>
+            </div>
+            <div class="bg-gray-900 p-5 rounded-xl border border-green-900 shadow-inner">
+                <span class="text-green-300 text-xs font-bold block mb-1">TERLEME (EDA/SCL)</span>
+                <div class="flex items-baseline">
+                    <p id="terSCL" class="text-6xl font-black text-white">2.5</p>
+                    <span class="text-green-500 text-xl ml-2">Su</span>
+                </div>
+                <span class="text-[8px] text-gray-600 uppercase">Deri İletkenliği (Mikro-Siemens)</span>
+            </div>
+        </div>
+
+        <div class="mt-6 text-[10px] text-gray-600 uppercase text-center border-t border-gray-900 pt-4 tracking-widest bg-gray-900/50 p-3 rounded-lg">
+            AI Analizi: Normal Aralık (%35 - %60 RH) | Deri İletkenliği Dengeli
+        </div>
+
+    </div>
+</div>
+    <script>
+        let tansiyonInterval, nabizInterval, atesInterval;
+
+        // --- TANSİYON FONKSİYONU ---
+        function grafigiGoster() {
+            document.getElementById('grafikPaneli').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            tansiyonInterval = setInterval(() => {
+                // Sistolik: 118-124, Diastolik: 77-83 arası rastgele
+                document.getElementById('tansiyonBuyuk').innerText = Math.floor(Math.random() * (124 - 118 + 1)) + 118;
+                document.getElementById('tansiyonKucuk').innerText = Math.floor(Math.random() * (83 - 77 + 1)) + 77;
+            }, 3000);
+        }
+        function grafigiKapat() {
+            document.getElementById('grafikPaneli').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            clearInterval(tansiyonInterval);
+        }
+
+        // --- NABIZ (EKG) FONKSİYONU ---
+        function nabizTablosunuGoster() {
+            document.getElementById('nabizPaneli').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            nabizInterval = setInterval(() => {
+                // Nabız: 70-75, SpO2: 97-100 arası rastgele
+                document.getElementById('liveHR').innerText = Math.floor(Math.random() * (75 - 70 + 1)) + 70;
+                document.getElementById('liveSpO2').innerText = Math.floor(Math.random() * (100 - 97 + 1)) + 97;
+            }, 2000);
+        }
+        function nabizTablosunuKapat() {
+            document.getElementById('nabizPaneli').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            clearInterval(nabizInterval);
+        }
+
+        // --- ATEŞ FONKSİYONU ---
+        function atesVerileriniGoster() {
+            document.getElementById('atesPaneli').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            atesInterval = setInterval(() => {
+                // Ateş: 36.4 - 37.1 arası rastgele ondalıklı
+                const yeniAtes = (Math.random() * (37.1 - 36.4) + 36.4).toFixed(1);
+                document.getElementById('atesDegeri').innerText = yeniAtes;
+            }, 4000);
+        }
+        function atesVerileriniKapat() {
+            document.getElementById('atesPaneli').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            clearInterval(atesInterval);
+        }
+        let nemInterval; // Zamanlayıcı kontrolü
+
+// --- NEM/TER FONKSİYONLARI ---
+function nemVerileriniGoster() {
+    // Paneli göster
+    document.getElementById('nemPaneli').classList.remove('hidden');
+    // Sayfanın arkada kaymasını engelle
+    document.body.style.overflow = 'hidden';
+    
+    // Her 3 saniyede bir verileri gerçekçi şekilde güncelle
+    nemInterval = setInterval(() => {
+        // Nem (RH): 42-50 arası tam sayı
+        const RH = Math.floor(Math.random() * (50 - 42 + 1)) + 42;
+        // Terleme (SCL): 2.1 - 3.2 arası ondalıklı sayı
+        const SCL = (Math.random() * (3.2 - 2.1) + 2.1).toFixed(1);
+
+        document.getElementById('nemRH').innerText = RH;
+        document.getElementById('terSCL').innerText = SCL;
+    }, 3000);
+}
+
+function nemVerileriniKapat() {
+    // Paneli gizle
+    document.getElementById('nemPaneli').classList.add('hidden');
+    // Sayfa kaydırmayı aç
+    document.body.style.overflow = 'auto';
+    // Arka plandaki döngüyü durdur (işlemciyi yormamak için)
+    clearInterval(nemInterval);
+}
+let seciliVital = "";
+let suankiBirim = "";
+
+function kayitlariGoster(tip, guncelDeger) {
+    seciliVital = tip;
+    suankiBirim = guncelDeger;
+    document.getElementById('panelBaslik').innerText = tip + " Geçmiş Kayıtları";
+    document.getElementById('panelGuncel').innerText = guncelDeger;
+    document.getElementById('kayitPaneli').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    tabloOlustur('haftalik'); // Varsayılan olarak haftalık tabloyu aç
+}
+
+function kayitKapat() {
+    document.getElementById('kayitPaneli').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function tabloOlustur(mod) {
+    const tabloAlani = document.getElementById('tabloAlani');
+    const btnHafta = document.getElementById('btnHafta');
+    const btnAy = document.getElementById('btnAy');
+
+    // Buton stillerini güncelle
+    if(mod === 'haftalik') {
+        btnHafta.classList.add('active-tab', 'text-white');
+        btnAy.classList.remove('active-tab', 'text-white');
+    } else {
+        btnAy.classList.add('active-tab', 'text-white');
+        btnHafta.classList.remove('active-tab', 'text-white');
+    }
+
+    let satırSayisi = mod === 'haftalik' ? 7 : 30;
+    let html = `<table class="vital-table">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Ölçüm Saati</th>
+                            <th>Değer (${seciliVital})</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+    for(let i = 0; i < satırSayisi; i++) {
+        let gun = new Date();
+        gun.setDate(gun.getDate() - i);
+        let tarihStr = gun.toLocaleDateString('tr-TR');
+        
+        // Rastgele değer üretimi (Örnek amaçlı)
+        let rastgeleDeger = (Math.random() * 5 + 36).toFixed(1); // Ateş için
+        if(seciliVital === 'Tansiyon') rastgeleDeger = "12" + Math.floor(Math.random()*9) + "/8" + Math.floor(Math.random()*9);
+        if(seciliVital === 'Nabız') rastgeleDeger = Math.floor(Math.random() * 20 + 70) + " bpm";
+        if(seciliVital === 'Nem/Ter') rastgeleDeger = "%" + Math.floor(Math.random() * 10 + 40);
+
+        html += `<tr>
+                    <td class="opacity-70">${tarihStr}</td>
+                    <td class="opacity-70">10:30</td>
+                    <td class="font-mono font-bold text-blue-400">${rastgeleDeger}</td>
+                    <td><span class="text-green-500 text-xs">● Normal</span></td>
+                 </tr>`;
+    }
+
+    html += `</tbody></table>`;
+    tabloAlani.innerHTML = html;
+}
+function kontrolPaneliAc(tip) {
+    const modal = document.getElementById('kontrolModal');
+    const icerik = document.getElementById('modalIcerik');
+    modal.classList.remove('hidden');
+
+    if(tip === 'isi') {
+        icerik.innerHTML = `
+            <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Yatak Isı Ayarı</h3>
+            <div class="space-y-8">
+                <div id="tempDisplay" class="text-center text-5xl font-mono text-orange-600 font-bold">24°C</div>
+                
+                <input type="range" min="18" max="40" value="24" 
+                       oninput="updateTemperature(this.value)" 
+                       class="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                
+                <div class="flex justify-between font-bold text-sm text-gray-500">
+                    <span>18°C (Soğutma)</span>
+                    <span>40°C (Isıtma)</span>
+                </div>
+                <button onclick="panelKapat()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-bold hover:bg-orange-600 transition shadow-lg">Ayarı Uygula</button>
+            </div>`;
+    } else if(tip === 'sehpa') {
+    icerik.innerHTML = `
+        <h3 class="text-2xl font-bold mb-8 text-center text-gray-800">Yatak Pozisyon Kontrolü</h3>
+        
+        <div class="space-y-10">
+            <div class="relative w-full h-48 bg-slate-50 rounded-3xl p-6 flex items-end justify-center border-2 border-dashed border-blue-200">
+                <div class="w-full h-10 flex space-x-1 relative">
+                    <div id="bed-head" class="w-1/4 h-full bg-blue-500 rounded-l-lg transition-transform duration-500 origin-right" style="transform: rotate(0deg)"></div>
+                    <div class="w-1/4 h-full bg-blue-400"></div>
+                    <div id="bed-foot" class="w-2/4 h-full bg-blue-500 rounded-r-lg transition-transform duration-500 origin-left" style="transform: rotate(0deg)"></div>
+
+                    <div class="absolute -left-2 -top-20 flex flex-col space-y-2">
+                        <button onclick="moveBed('head', 'up')" class="w-10 h-10 bg-white border-2 border-blue-500 rounded-full text-blue-500 hover:bg-blue-500 hover:text-white transition shadow-md"><i class="fas fa-arrow-up"></i></button>
+                        <button onclick="moveBed('head', 'down')" class="w-10 h-10 bg-white border-2 border-blue-500 rounded-full text-blue-500 hover:bg-blue-500 hover:text-white transition shadow-md"><i class="fas fa-arrow-down"></i></button>
+                    </div>
+
+                    <div class="absolute -right-2 -top-20 flex flex-col space-y-2">
+                        <button onclick="moveBed('foot', 'up')" class="w-10 h-10 bg-white border-2 border-blue-500 rounded-full text-blue-500 hover:bg-blue-500 hover:text-white transition shadow-md"><i class="fas fa-arrow-up"></i></button>
+                        <button onclick="moveBed('foot', 'down')" class="w-10 h-10 bg-white border-2 border-blue-500 rounded-full text-blue-500 hover:bg-blue-500 hover:text-white transition shadow-md"><i class="fas fa-arrow-down"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="moveBed('reset')" class="p-4 border-2 border-gray-200 rounded-2xl font-bold hover:bg-gray-50 transition">Düz Yatış</button>
+                <button onclick="moveBed('eat')" class="p-4 border-2 border-blue-500 text-blue-600 rounded-2xl font-bold hover:bg-blue-50 transition">Yemek Pozisyonu</button>
+            </div>
+            <button onclick="panelKapat()" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold shadow-lg">Değişiklikleri Kaydet</button>
+        </div>`;
+}
+}
+// Bu fonksiyon slider her hareket ettiğinde üstteki yazıyı günceller
+function updateTemperature(val) {
+    const display = document.getElementById('tempDisplay');
+    if(display) {
+        display.innerText = val + "°C";
+    }
+}
+// Yatak açılarını takip eden değişkenler
+let headAngle = 0;
+let footAngle = 0;
+
+function moveBed(part, dir) {
+    const head = document.getElementById('bed-head');
+    const foot = document.getElementById('bed-foot');
+
+    if(part === 'head') {
+        // YUKARI: Değeri eksiye götürerek yukarı kaldırır
+        if(dir === 'up') headAngle = Math.max(headAngle - 10, -50); 
+        // AŞAĞI: Değeri sıfıra çekerek düzleştirir
+        else headAngle = Math.min(headAngle + 10, 0);
+        
+        if(head) head.style.transform = `rotate(${headAngle}deg)`;
+    } 
+    else if(part === 'foot') {
+        // Ayak kısmı için yukarı
+        if(dir === 'up') footAngle = Math.min(footAngle + 5, 20);
+        else footAngle = Math.max(footAngle - 5, 0);
+        
+        if(foot) foot.style.transform = `rotate(${-footAngle}deg)`;
+    } 
+    else if(part === 'reset') {
+        headAngle = 0; footAngle = 0;
+        head.style.transform = `rotate(0deg)`;
+        foot.style.transform = `rotate(0deg)`;
+    } 
+    else if(part === 'eat') {
+        headAngle = -35; footAngle = 0;
+        head.style.transform = `rotate(-35deg)`;
+        foot.style.transform = `rotate(0deg)`;
+    }
+}
+function asistanAc() {
+    const modal = document.getElementById('kontrolModal');
+    const icerik = document.getElementById('modalIcerik');
+    modal.classList.remove('hidden');
+    
+    icerik.innerHTML = `
+        <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white mr-3">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="text-xl font-bold">Gemini AI Asistan</h3>
+        </div>
+        <div class="bg-gray-100 rounded-2xl p-4 h-64 mb-4 overflow-y-auto text-sm" id="chatBox">
+            <p class="bg-purple-100 p-3 rounded-lg mb-2">Merhaba! Ben Gemini. Hastanın konforu veya sağlık verileri hakkında size nasıl yardımcı olabilirim?</p>
+        </div>
+        <div class="relative">
+            <input type="text" placeholder="Sorunuzu yazın..." class="w-full p-3 pr-12 border rounded-xl outline-none focus:border-purple-500">
+            <button class="absolute right-3 top-3 text-purple-600"><i class="fas fa-paper-plane"></i></button>
+        </div>`;
+}
+
+function panelKapat() {
+    document.getElementById('kontrolModal').classList.add('hidden');
+}
+function monitoruBaslat() {
+    // Sayfa içeriğini görseldeki gibi siberpunk temaya dönüştürür
+    document.body.innerHTML = `
+    <div class="monitor-container h-screen w-screen overflow-hidden relative" style="background: #020617; font-family: sans-serif; color: white;">
+        
+        <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#1e40af 1px, transparent 1px); background-size: 30px 30px;"></div>
+        <div class="absolute inset-0" style="background: radial-gradient(circle at 70% 50%, #1e3a8a33 0%, transparent 50%);"></div>
+
+        <div class="relative z-10 flex justify-between p-6">
+            <div class="space-y-3">
+                <div class="flex items-center space-x-3 bg-blue-900/40 border border-blue-500/50 p-3 rounded-xl backdrop-blur-md">
+                    <div class="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span class="text-blue-100">Kendimi kötü hissediyorum</span>
+                </div>
+                <div class="flex items-center space-x-3 bg-slate-900/80 border border-slate-700 p-3 rounded-xl text-sm">
+                    <i class="fas fa-robot text-purple-400"></i>
+                    <span>Vital verileriniz kontrol ediliyor, hemşireye haber verildi.</span>
+                </div>
+            </div>
+            <div class="text-right flex items-center space-x-3">
+                <span class="text-xs text-purple-400 font-bold tracking-widest uppercase">Anlık AI Analizi</span>
+                <i class="fas fa-brain text-3xl text-purple-400"></i>
+            </div>
+        </div>
+
+        <div class="relative z-10 grid grid-cols-12 gap-6 px-10 h-3/5">
+            
+            <div class="col-span-3 flex flex-col justify-around py-4">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-heart text-red-500 text-5xl"></i>
+                    <div>
+                        <span id="v_nabiz" class="text-6xl font-black">110</span>
+                        <span class="text-blue-400 block font-bold">bpm</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-droplet text-red-600 text-5xl"></i>
+                    <div>
+                        <span id="v_oksijen" class="text-6xl font-black">88%</span>
+                        <span class="text-red-400 block font-bold">SpO2</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-temperature-high text-orange-500 text-5xl"></i>
+                    <div>
+                        <span id="v_ates" class="text-5xl font-black">38.8</span>
+                        <span class="text-orange-300 block font-bold">°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-9 relative border-2 border-blue-500/30 rounded-[3rem] bg-blue-950/10 backdrop-blur-sm overflow-hidden shadow-[0_0_50px_rgba(30,58,138,0.3)]">
+                        <img src="Fotoğraf/images.2.png" class="absolute inset-0 w-full h-full object-cover opacity-60" style="filter: hue-rotate(180deg) brightness(0.8);">                
+                        <div class="absolute bottom-0 left-0 w-full p-8">
+                    <div class="h-24 w-full opacity-80 border-b border-blue-500/30 relative">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-green-400 text-xs tracking-[0.5em] animate-pulse">CANLI VERİ AKIŞI AKTİF</span>
+                        </div>
+                        <div class="w-full h-full bg-[linear-gradient(90deg,transparent_0%,#4ade80_50%,transparent_100%)] bg-[length:200%_100%] animate-[wave_2s_linear_infinite]" style="opacity: 0.3;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative z-10 flex justify-between items-center p-10">
+            <div class="flex items-center space-x-4 bg-black/40 p-3 rounded-2xl border border-white/10">
+                <div class="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(37,99,235,0.6)]">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold">Gemini AI</h4>
+                    <p class="text-blue-400 text-xs">Aktif Bakım Modu</p>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="px-10 py-4 bg-slate-800/50 hover:bg-slate-700 rounded-2xl border border-slate-600 transition-all font-bold">
+                Ana Sayfaya Dön
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes wave { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    </style>
+    `;
+
+    // Değerleri her 2 saniyede bir hafifçe oynat (Canlı hissi versin)
+    setInterval(() => {
+        document.getElementById('v_nabiz').innerText = 105 + Math.floor(Math.random() * 10);
+        document.getElementById('v_ates').innerText = (38.2 + Math.random() * 0.8).toFixed(1);
+    }, 2000);
+}
+    </script>
+</body>
+</html>
